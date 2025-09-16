@@ -13,6 +13,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import PlantsPage from "./pages/PlantsPage";
+import ProfilePage from "./pages/ProfilePage";
+
 
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
         <Link to="/">Home</Link> | {" "}
         <Link to="/auth">Login/Sign Up</Link> | {" "}
         <Link to="/plants">My Plants</Link> | {" "}
+        <Link to="/profile">My Profile</Link>
+
       </nav>
 
       <Routes>
@@ -33,7 +37,7 @@ function App() {
         <Route path="/" element={<HomePage />}/>
         <Route path="/auth" element={<AuthPage />}/>
         <Route path="/plants" element={<PlantsPage />}/>
-
+        <Route path="/profile" element={<ProfilePage/>}/>
 
       </Routes>
     </Router>
