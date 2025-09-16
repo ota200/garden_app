@@ -5,9 +5,12 @@ import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom"; // To navigate react with pages.
 
 export default function AuthPage() {
+  const [username, setUserName] = useState("");
+
   const [email, setEmail] = useState(""); // Email input
   const [password, setPassword] = useState(""); // Password input
   const [authMode, setAuthMode] = useState("login"); // login/ signup, lets you toggle between them
+  
   const navigate = useNavigate(); // a function to change pages
 
   const handleLogin = async (e) => {
@@ -17,6 +20,11 @@ export default function AuthPage() {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        data: {
+          username: username,
+        },
+      },
     });
 
     if (error) alert(error.message);
@@ -48,10 +56,20 @@ export default function AuthPage() {
       <form onSubmit={authMode == "login" ? handleLogin : handleSignUp}>
         {/** Controlled input: value is sotred in state, OnChnage keeps state updated */}
         <input
+          type="text"
+          placeholder="username"
+          value={username}
+          onChange={(e) => setUserName(e.target.value)}
+          required
+        />
+        
+        <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
+
         />
             
         <input
@@ -59,7 +77,11 @@ export default function AuthPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+
         />
+
+
         <button type="submit">
           {authMode === "login" ? "Login" : "Sign Up"}
         </button>
