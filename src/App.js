@@ -21,11 +21,12 @@ function App() {
       .from("plants")
       .insert([
         {name, type, date, user_id: user.id}
-      ]);
+      ])
+      .select();
     
     if (error){
-      console.error(error);
-      alert("Error adding plant");
+      console.error("Supabase insert error: ",error);
+      alert(error.message);
     } else {
     //const newPlant = {name, type, date }; // Turn the info gathered into an obj
       setPlants([...plants, data[0]]) // Add that obj to the usestate array 
@@ -33,7 +34,19 @@ function App() {
       setType('');
       setDate('');
     }
-  }
+  };
+
+  const fetchPlants = async (userId) => {
+    if (!userId) return;
+
+    const { data, error } = await supabase
+      .from("plants")
+      .select("*")
+      .eq("user_id", userId);
+    
+      if(error) console.error(error);
+      else setPlants(data);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,8 +57,22 @@ function App() {
     });
 
     if (error) alert(error.message);
-    else setUser(data.user);
-  }
+    else {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError){
+        console.error(userError);
+        alert("Error fetching user");
+        return;
+      }
+      
+      setUser(userData.user);
+      fetchPlants(userData.user.id);
+    }
+    setEmail("");
+    setPassword("");
+
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -57,7 +84,10 @@ function App() {
 
     if (error) alert(error.message);
     else alert("Signed up! Check your email to confirm.");
-  }
+
+    setEmail("");
+    setPassword("");
+  };
   return (
     <div>
       <h1>Hello</h1>
@@ -80,13 +110,13 @@ function App() {
           <button type="submit">{authMode === "login" ? "Login": "Sign Up"}</button>
         </form>
         <p>
-          {authMode === "login" ? "Dont have an account": "Alerady have an account"}
-          <button onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>
+          {authMode === "login" ? "Dont have an account": "Already have an account"}
+          <button type="button" onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>
             {authMode === "login" ? "Sign Up": "Login"}
           </button>
         </p>
       </div>
-      <form onSubmit={handleSubmit}>
+      {user && (<form onSubmit={handleSubmit}>
         <input 
           title='name' 
           value = {name} 
@@ -106,7 +136,7 @@ function App() {
           onChange={(e) => setDate(e.target.value)}
         />
         <button type="submit">Add Plant</button>
-      </form>
+      </form>)}
       {/* Anything in is treated as javascript. */}
       <div>
         <p>Plants array length: {plants.length}</p>
